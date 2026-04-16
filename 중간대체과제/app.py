@@ -17,6 +17,8 @@ st.set_page_config(page_title="2026 MZ 밈고사", page_icon="🧠", layout="cen
 STUDENT_ID = "2024404009"
 STUDENT_NAME = "이지우"
 
+BASE_DIR = Path(__file__).parent
+
 
 _QUIZ_DATA_PATH = Path(__file__).parent / "quiz_data.py"
 
@@ -319,8 +321,8 @@ else:
         if st.session_state.question_start_time is None:
             st.session_state.question_start_time = time.time()
 
-        image_path = f"images/{current_question['image']}"
-        st.image(image_path, use_container_width=True)
+        image_path = BASE_DIR / "images" / current_question["image"]
+        st.image(str(image_path), use_container_width=True)
 
         st.markdown(f"### 문제 {current_question['id']}")
         st.write(current_question["question"])
