@@ -197,6 +197,11 @@ if not st.session_state.logged_in:
             n_errors.append("닉네임은 12자 이하로 입력해주세요.")
 
         if u_errors or p_errors or n_errors:
+            print(
+                f"[LOG] login_validation_failed user={username!r} nickname={n!r} "
+                f"uErr={len(u_errors)} pErr={len(p_errors)} nErr={len(n_errors)}",
+                flush=True,
+            )
             if u_errors:
                 st.error("아이디 조건이 맞지 않습니다:\n- " + "\n- ".join(u_errors))
             if p_errors:
@@ -204,6 +209,7 @@ if not st.session_state.logged_in:
             if n_errors:
                 st.error("닉네임 조건이 맞지 않습니다:\n- " + "\n- ".join(n_errors))
         elif check_login(username, password):
+            print(f"[LOG] login_success user={username!r} nickname={n!r}", flush=True)
             st.session_state.logged_in = True
             st.session_state.username = username
             st.session_state.nickname = n
@@ -211,6 +217,7 @@ if not st.session_state.logged_in:
             st.success("로그인 성공")
             st.rerun()
         else:
+            print(f"[LOG] login_failed user={username!r} nickname={n!r}", flush=True)
             st.error("로그인 실패: 아이디 또는 비밀번호를 확인하세요.")
 
 else:
@@ -238,6 +245,7 @@ else:
                 st.write(f"**{rank}위**  {r['nickname']}  ·  {r['score']}점  ·  {r['correct']}  ·  {r['time_sec']:.2f}초")
 
     if st.sidebar.button("로그아웃"):
+        print(f"[LOG] logout_clicked user={st.session_state.username!r}", flush=True)
         logout()
         st.rerun()
 
@@ -301,10 +309,12 @@ else:
         col1, col2 = st.columns(2)
         with col1:
             if st.button("다시 풀기"):
+                print(f"[LOG] retry_quiz_clicked user={st.session_state.username!r}", flush=True)
                 reset_quiz()
                 st.rerun()
         with col2:
             if st.button("처음으로"):
+                print(f"[LOG] go_home_clicked user={st.session_state.username!r}", flush=True)
                 logout()
                 st.rerun()
 
@@ -331,6 +341,10 @@ else:
         if hint:
             hint_key = str(current_question.get("id"))
             if st.button("힌트 보기", key=f"hint_btn_{hint_key}"):
+                print(
+                    f"[LOG] hint_shown qid={current_question.get('id')} user={st.session_state.username!r}",
+                    flush=True,
+                )
                 st.session_state.shown_hints[hint_key] = True
             if st.session_state.shown_hints.get(hint_key):
                 st.info(hint)
@@ -384,7 +398,8 @@ else:
         else:
             choice = st.radio("정답을 선택하세요.", current_question["options"], key=widget_key)
 
-        if (q_type == "text" and submitted) or (q_type != "text" and st.button("제출")):
+        clicked_submit = (q_type == "text" and submitted) or (q_type != "text" and st.button("제출"))
+        if clicked_submit:
             elapsed = time.time() - st.session_state.question_start_time
             if q_type == "text":
                 norm_choice = _norm_text(choice)
@@ -411,6 +426,11 @@ else:
             if is_correct:
                 earned_score = 10 + get_time_bonus(elapsed)
 
+            print(
+                f"[LOG] answer_submitted user={st.session_state.username!r} qid={current_question.get('id')} "
+                f"type={q_type} elapsed={elapsed:.2f} correct={is_correct} earned={earned_score}",
+                flush=True,
+            )
             st.session_state.score += earned_score
             st.session_state.results.append(
                 {
