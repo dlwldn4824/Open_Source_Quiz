@@ -11,6 +11,8 @@ import streamlit.components.v1 as components
 import quiz_data as quiz_module
 
 
+print("[PAGE LOAD] Streamlit app loaded", flush=True)
+
 st.set_page_config(page_title="2026 MZ 밈고사", page_icon="🧠", layout="centered")
 
 
@@ -167,6 +169,12 @@ st.caption("이미지 기반 밈 퀴즈 + 시간 반영 점수 시스템")
 st.write(f"학번: {STUDENT_ID}")
 st.write(f"이름: {STUDENT_NAME}")
 
+with st.expander("로그 테스트(과제용)"):
+    name = st.text_input("이름 입력", key="log_test_name")
+    if st.button("확인", key="log_test_confirm"):
+        print(f"[USER ACTION] 확인 버튼 클릭 / 입력값: {name}", flush=True)
+        st.success(f"{name}님 반갑습니다!")
+
 st.divider()
 
 if not st.session_state.logged_in:
@@ -187,6 +195,10 @@ if not st.session_state.logged_in:
     )
 
     if submitted:
+        print(
+            f"[USER ACTION] login_clicked username={username!r} nickname={(nickname or '').strip()!r}",
+            flush=True,
+        )
         u_errors = validate_username(username)
         p_errors = validate_password(password)
         n = (nickname or "").strip()
@@ -428,7 +440,7 @@ else:
 
             print(
                 f"[LOG] answer_submitted user={st.session_state.username!r} qid={current_question.get('id')} "
-                f"type={q_type} elapsed={elapsed:.2f} correct={is_correct} earned={earned_score}",
+                f"type={q_type} choice={choice!r} elapsed={elapsed:.2f} correct={is_correct} earned={earned_score}",
                 flush=True,
             )
             st.session_state.score += earned_score
