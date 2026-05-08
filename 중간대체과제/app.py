@@ -217,12 +217,6 @@ st.caption("이미지 기반 밈 퀴즈 + 시간 반영 점수 시스템")
 st.write(f"학번: {STUDENT_ID}")
 st.write(f"이름: {STUDENT_NAME}")
 
-with st.expander("로그 테스트(과제용)"):
-    name = st.text_input("이름 입력", key="log_test_name")
-    if st.button("확인", key="log_test_confirm"):
-        print(f"[USER ACTION] 확인 버튼 클릭 / 입력값: {name}", flush=True)
-        st.success(f"{name}님 반갑습니다!")
-
 st.divider()
 
 if not st.session_state.logged_in:
