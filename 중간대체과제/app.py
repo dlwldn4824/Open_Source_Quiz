@@ -6,7 +6,6 @@ import re
 import importlib
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import quiz_data as quiz_module
 
@@ -366,47 +365,6 @@ else:
             # 주관식: 엔터로 제출되도록 form 사용
             with st.form(f"answer_form_{current_question['id']}", clear_on_submit=False):
                 user_text = st.text_input("정답을 입력하세요.", key=widget_key)
-
-                # Streamlit은 text_input autofocus를 기본 지원하지 않아 JS로 포커스를 잡습니다.
-                # 마지막 텍스트 입력창을 대상으로 여러 번 재시도합니다.
-                _autofocus_js = """
-<script>
-(() => {
-  const focusCurrentFormTextInput = () => {
-    try {
-      // Streamlit form은 <form> 태그로 렌더링됩니다.
-      // 현재 문제는 "가장 마지막 form"으로 간주하고 그 안의 text input에 포커스합니다.
-      const forms = Array.from(parent.document.querySelectorAll('form'));
-      const form = forms[forms.length - 1];
-      if (!form) return false;
-
-      const target = form.querySelector('input[type="text"]');
-      if (target) {
-        target.focus();
-        target.select?.();
-        return true;
-      }
-    } catch (e) {}
-    return false;
-  };
-
-  let tries = 0;
-  const tick = () => {
-    tries += 1;
-    if (focusCurrentFormTextInput()) return;
-    if (tries < 20) setTimeout(tick, 80);
-  };
-  setTimeout(tick, 30);
-})();
-</script>
-                """
-                # streamlit.components.v1.html deprecation 대응:
-                # - 최신 Streamlit: st.iframe(srcdoc=...) 사용
-                # - 구버전 호환: components.html 유지
-                if hasattr(st, "iframe"):
-                    st.iframe(srcdoc=_autofocus_js, height=0, scrolling=False)
-                else:
-                    components.html(_autofocus_js, height=0)
 
                 submitted = st.form_submit_button("제출")
 
