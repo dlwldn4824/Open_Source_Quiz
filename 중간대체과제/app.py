@@ -4,11 +4,60 @@ from pathlib import Path
 import difflib
 import re
 import importlib
+import os
 
 import streamlit as st
 
 import quiz_data as quiz_module
 
+
+# region agent debug log
+# NOTE: must be writable on EC2 too (use repo-relative path).
+_DEBUG_NDJSON_PATH = str(Path(__file__).resolve().parent / ".cursor" / "debug-5394eb.log")
+
+
+def _dbg(hypothesisId: str, message: str, data: dict | None = None, runId: str = "pre-fix") -> None:
+    payload = {
+        "sessionId": "5394eb",
+        "runId": runId,
+        "hypothesisId": hypothesisId,
+        "location": "중간대체과제/app.py",
+        "message": message,
+        "data": data or {},
+        "timestamp": int(time.time() * 1000),
+    }
+    try:
+        os.makedirs(Path(_DEBUG_NDJSON_PATH).parent, exist_ok=True)
+        with open(_DEBUG_NDJSON_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+    # EC2 콘솔에서도 바로 보이도록 한 줄로 출력
+    try:
+        print(f"[DBG {hypothesisId}] {message} data={payload['data']}", flush=True)
+    except Exception:
+        pass
+
+
+try:
+    _self = Path(__file__).resolve()
+    _self_text = _self.read_text(encoding="utf-8", errors="replace")
+    _dbg(
+        "H1",
+        "startup_file_fingerprint",
+        {
+            "__file__": str(_self),
+            "cwd": os.getcwd(),
+            "streamlit_version": getattr(st, "__version__", None),
+            "contains_use_container_width": ("use_container_width" in _self_text),
+            "contains_components_html": ("components.html" in _self_text),
+            "contains_components_v1_html": ("components.v1.html" in _self_text) or ("st.components.v1.html" in _self_text),
+        },
+    )
+except Exception as e:
+    _dbg("H1", "startup_fingerprint_failed", {"error": str(e)})
+# endregion agent debug log
 
 print("[PAGE LOAD] Streamlit app loaded", flush=True)
 
