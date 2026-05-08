@@ -195,7 +195,7 @@ if not st.session_state.logged_in:
 
     if submitted:
         print(
-            f"[USER ACTION] login_clicked username={username!r} nickname={(nickname or '').strip()!r}",
+            f"[USER ACTION] 로그인 버튼 클릭 / 아이디={username!r} 닉네임={(nickname or '').strip()!r}",
             flush=True,
         )
         u_errors = validate_username(username)
@@ -220,7 +220,7 @@ if not st.session_state.logged_in:
             if n_errors:
                 st.error("닉네임 조건이 맞지 않습니다:\n- " + "\n- ".join(n_errors))
         elif check_login(username, password):
-            print(f"[LOG] login_success user={username!r} nickname={n!r}", flush=True)
+            print(f"[USER ACTION] 로그인 성공 / 아이디={username!r} 닉네임={n!r}", flush=True)
             st.session_state.logged_in = True
             st.session_state.username = username
             st.session_state.nickname = n
@@ -228,7 +228,7 @@ if not st.session_state.logged_in:
             st.success("로그인 성공")
             st.rerun()
         else:
-            print(f"[LOG] login_failed user={username!r} nickname={n!r}", flush=True)
+            print(f"[USER ACTION] 로그인 실패 / 아이디={username!r} 닉네임={n!r}", flush=True)
             st.error("로그인 실패: 아이디 또는 비밀번호를 확인하세요.")
 
 else:
@@ -256,7 +256,7 @@ else:
                 st.write(f"**{rank}위**  {r['nickname']}  ·  {r['score']}점  ·  {r['correct']}  ·  {r['time_sec']:.2f}초")
 
     if st.sidebar.button("로그아웃"):
-        print(f"[LOG] logout_clicked user={st.session_state.username!r}", flush=True)
+        print(f"[USER ACTION] 로그아웃 버튼 클릭 / user={st.session_state.username!r}", flush=True)
         logout()
         st.rerun()
 
@@ -320,12 +320,12 @@ else:
         col1, col2 = st.columns(2)
         with col1:
             if st.button("다시 풀기"):
-                print(f"[LOG] retry_quiz_clicked user={st.session_state.username!r}", flush=True)
+                print(f"[USER ACTION] 다시 풀기 버튼 클릭 / user={st.session_state.username!r}", flush=True)
                 reset_quiz()
                 st.rerun()
         with col2:
             if st.button("처음으로"):
-                print(f"[LOG] go_home_clicked user={st.session_state.username!r}", flush=True)
+                print(f"[USER ACTION] 처음으로 버튼 클릭 / user={st.session_state.username!r}", flush=True)
                 logout()
                 st.rerun()
 
@@ -353,7 +353,7 @@ else:
             hint_key = str(current_question.get("id"))
             if st.button("힌트 보기", key=f"hint_btn_{hint_key}"):
                 print(
-                    f"[LOG] hint_shown qid={current_question.get('id')} user={st.session_state.username!r}",
+                    f"[USER ACTION] 힌트 보기 버튼 클릭 / qid={current_question.get('id')} user={st.session_state.username!r}",
                     flush=True,
                 )
                 st.session_state.shown_hints[hint_key] = True
@@ -401,7 +401,7 @@ else:
                 earned_score = 10 + get_time_bonus(elapsed)
 
             print(
-                f"[LOG] answer_submitted user={st.session_state.username!r} qid={current_question.get('id')} "
+                f"[USER ACTION] 제출 버튼 클릭 / user={st.session_state.username!r} qid={current_question.get('id')} "
                 f"type={q_type} choice={choice!r} elapsed={elapsed:.2f} correct={is_correct} earned={earned_score}",
                 flush=True,
             )
@@ -425,3 +425,12 @@ else:
 
             st.rerun()
 
+if not st.session_state.get("_debug_state_dumped"):
+    print(
+        f"[STATE] logged_in={st.session_state.get('logged_in')} "
+        f"user={st.session_state.get('username')!r} "
+        f"idx={st.session_state.get('current_index')} "
+        f"score={st.session_state.get('score')}",
+        flush=True,
+    )
+    st.session_state["_debug_state_dumped"] = True
